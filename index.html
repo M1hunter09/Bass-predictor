@@ -90,18 +90,29 @@
         const month = today.getMonth() + 1;
         if (month >= 4 && month <= 5) score += 1;
 
+const stateTemps = {
+  "FL": [62, 65, 70, 75, 80, 85, 87, 87, 85, 80, 72, 66],
+  "MA": [37, 40, 45, 53, 63, 70, 75, 74, 68, 60, 50, 41],
+  "TX": [50, 55, 62, 68, 75, 80, 85, 84, 78, 70, 60, 52]
+};
+
+function estimateWaterTempWithLocation(temp, condition, wind, month, stateAbbr) {
+  const fallback = temp - 5;
+
+  if (!stateTemps[stateAbbr]) return fallback;
+
+  const base = stateTemps[stateAbbr][month - 1];
+
+  let sunBonus = condition.includes("sunny") ? 2 : (condition.includes("cloudy") ? -1 : 0);
+  let windPenalty = wind > 10 ? -1 : 0;
+
+  return Math.round((base + sunBonus + windPenalty) * 10) / 10;
+}
 
 
-        // Estimate water temperature
-        let seasonalOffset = 0;
-        if (month >= 3 && month <= 5) seasonalOffset = -3; // spring
-        else if (month >= 9 && month <= 11) seasonalOffset = -1; // fall
+       const stateAbbr = weather.location.region;
+let estWaterTemp = estimateWaterTempWithLocation(temp, condition, wind, month, stateAbbr);
 
-        let sunBonus = condition.includes("sunny") ? 2 : (condition.includes("cloudy") ? -1 : 0);
-        let windPenalty = wind > 10 ? -1 : 0;
-
-        let estWaterTemp = temp + seasonalOffset + sunBonus + windPenalty - 5;
-        estWaterTemp = Math.round(estWaterTemp * 10) / 10;
 
         // Final prediction
         let prediction;
