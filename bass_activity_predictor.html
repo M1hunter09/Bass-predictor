@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bass Activity Predictor</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; background-color: #f2f2f2; }
+        h1 { color: #2e7d32; }
+        label, input, select { display: block; margin-top: 10px; }
+        #result { margin-top: 20px; font-size: 1.2em; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Bass Activity Predictor</h1>
+    <label for="timeOfDay">Time of Day:</label>
+    <select id="timeOfDay">
+        <option value="morning">Morning (5–9 AM)</option>
+        <option value="midday">Midday (10 AM–2 PM)</option>
+        <option value="evening">Evening (3–7 PM)</option>
+        <option value="night">Night (8 PM–4 AM)</option>
+    </select>
+
+    <label for="waterTemp">Water Temperature (°F):</label>
+    <input type="number" id="waterTemp" min="30" max="90">
+
+    <label for="moonPhase">Moon Phase:</label>
+    <select id="moonPhase">
+        <option value="full">Full Moon</option>
+        <option value="new">New Moon</option>
+        <option value="waxing">Waxing</option>
+        <option value="waning">Waning</option>
+        <option value="quarter">Quarter</option>
+    </select>
+
+    <label for="weather">Weather:</label>
+    <select id="weather">
+        <option value="overcast">Overcast</option>
+        <option value="clear">Clear</option>
+        <option value="rain">Light Rain</option>
+        <option value="windy">Windy</option>
+    </select>
+
+    <button onclick="predictActivity()">Predict Activity</button>
+
+    <div id="result"></div>
+
+    <script>
+        function predictActivity() {
+            const time = document.getElementById('timeOfDay').value;
+            const temp = parseInt(document.getElementById('waterTemp').value);
+            const moon = document.getElementById('moonPhase').value;
+            const weather = document.getElementById('weather').value;
+
+            let score = 0;
+
+            if (time === 'morning' || time === 'evening') score += 2;
+            else if (time === 'night') score += 1;
+
+            if (temp >= 55 && temp <= 75) score += 3;
+            else if (temp >= 50 && temp <= 80) score += 1;
+
+            if (moon === 'full' || moon === 'new') score += 2;
+            else if (moon === 'waxing' || moon === 'waning') score += 1;
+
+            if (weather === 'overcast' || weather === 'light rain') score += 2;
+            else if (weather === 'clear') score += 1;
+
+            let result = "Low";
+            if (score >= 7) result = "High";
+            else if (score >= 4) result = "Moderate";
+
+            document.getElementById('result').innerText = "Predicted Bass Activity: " + result;
+        }
+    </script>
+</body>
+</html>
