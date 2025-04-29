@@ -110,19 +110,20 @@
         else if (score >= 3) prediction = "Fair. Try deeper water or cover.";
         else prediction = "Tough bite expected. Use finesse and fish slow.";
 
-        // Lure suggestion logic
-if (isSpawn && condition.includes("clear") && hour >= 6 && hour <= 10) {
-  // where isSpawn should also use estimatedWaterTemp:
+// where isSpawn should also use estimatedWaterTemp:
   const isSpawn = (month >= 4 && month <= 6) && (estWaterTemp >= 60 && estWaterTemp <= 75);
   const isSummer = (month >= 6 && month <= 8 && estWaterTemp >= 75);
   const isFall = (month >= 9 && month <= 11);
+        
+        // Lure suggestion logic
+if (isSpawn && condition.includes("clear") && hour >= 6 && hour <= 10) {
   lure = "Texas-rigged soft plastic or wacky rig near beds";
 } else if (isSummer && estWaterTemp > 78 && wind < 5 && hour >= 12) {
   lure = "Deep diving crankbait or drop shot";
 } else if (isFall && wind >= 8 && condition.includes("cloudy")) {
   lure = "Spinnerbait or lipless crankbait";
 } else if (wind >= 10) {
-  lure = "Chatterbait or spinnerbai";
+  lure = "Chatterbait or spinnerbait";
 } else if (pressure < 29.6 || condition.includes("rain")) {
   lure = "Finesse worm or ned rig tight to cover";
 } else if (hour >= 5 && hour <= 8 && temp >= 68 && condition.includes("clear")) {
