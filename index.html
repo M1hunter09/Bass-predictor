@@ -97,7 +97,6 @@ const stateTemps = {
 };
 
 function estimateWaterTempWithLocation(temp, condition, wind, month, stateAbbr) {
-  const fallback = temp - 5;
 
   if (!stateTemps[stateAbbr]) return fallback;
 
