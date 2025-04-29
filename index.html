@@ -78,8 +78,11 @@
         let lure = "Soft plastic worms";
 
         // Conditions scoring
-        if (temp >= 60 && temp <= 80) score += 2;
-        else if ((temp >= 50 && temp < 60) || (temp > 80 && temp <= 85)) score += 1;
+        // Modify temp scoring to account for bright midday conditions
+if (temp >= 60 && temp <= 75) score += 2;
+else if ((temp > 75 && temp <= 80) && (hour <= 9 || hour >= 17)) score += 1; // cooler hours
+else if (temp > 80) score -= 1;
+
 
         if (pressure >= 29.6 && pressure <= 30.2) score += 2;
         else score += 1;
@@ -87,6 +90,9 @@
         if (condition.includes("cloudy") || condition.includes("overcast")) score += 2;
         else if (condition.includes("clear") || condition.includes("sunny")) score += 1;
         else if (condition.includes("rain")) score -= 1;
+        
+        if (condition.includes("sunny") && hour >= 11 && hour <= 16) score -= 1;
+
 
         if (wind > 5 && wind <= 12) score += 1;
 
