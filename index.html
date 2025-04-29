@@ -91,10 +91,33 @@
         if (month >= 4 && month <= 5) score += 1;
 
         // Lure suggestions
-        if (temp >= 68 && condition.includes("clear")) lure = "Topwater frog or popper";
-        else if (wind > 10) lure = "Spinnerbait or chatterbait";
-        else if (condition.includes("cloudy")) lure = "Crankbait or swimbait";
-        else if (pressure < 29.6) lure = "Finesse worm or ned rig";
+         // Water temp estimate (simple baseline adjustment)
+const waterTemp = temp - 5;
+
+// Spawn timing based on water temp and season
+const isSpawn = (month >= 4 && month <= 6) && (waterTemp >= 60 && waterTemp <= 75);
+const isSummer = (month >= 6 && month <= 8 && waterTemp >= 75);
+const isFall = (month >= 9 && month <= 11);
+
+// Lure suggestion logic
+if (isSpawn && condition.includes("clear") && hour >= 6 && hour <= 10) {
+  lure = "Texas-rigged soft plastic or wacky rig near beds";
+} else if (isSummer && waterTemp > 78 && wind < 5 && hour >= 12) {
+  lure = "Deep diving crankbait or drop shot";
+} else if (isFall && wind >= 8 && condition.includes("cloudy")) {
+  lure = "Spinnerbait or lipless crankbait";
+} else if (wind >= 10) {
+  lure = "Chatterbait or spinnerbait in stained water";
+} else if (pressure < 29.6 || condition.includes("rain")) {
+  lure = "Finesse worm or ned rig tight to cover";
+} else if (hour >= 5 && hour <= 8 && temp >= 68 && condition.includes("clear")) {
+  lure = "Topwater walking bait or buzzbait";
+} else if (moonPhase.includes("Full") || moonPhase.includes("New")) {
+  lure = "Jig or swimbait during early and late hours";
+} else {
+  lure = "Senko-style worm or fluke around structure";
+}
+
 
         // Estimate water temperature
         let seasonalOffset = 0;
