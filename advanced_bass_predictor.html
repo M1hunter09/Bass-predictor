@@ -1,0 +1,124 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Advanced Bass Activity Predictor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 40px auto;
+      background: #f4fafd;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #bbb;
+    }
+    input, button {
+      font-size: 1em;
+      padding: 10px;
+      margin-top: 10px;
+      width: 100%;
+    }
+    #result {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>Advanced Bass Activity Predictor</h2>
+  <p>Enter your ZIP code and API key to get detailed fishing predictions.</p>
+
+  <input type="text" id="zip" placeholder="Enter ZIP Code">
+  <input type="text" id="apikey" placeholder="Enter your WeatherAPI Key">
+  <button onclick="predictActivity()">Predict Bass Activity</button>
+
+  <div id="result"></div>
+
+  <script>
+    async function predictActivity() {
+      const zip = document.getElementById('zip').value;
+      const apiKey = document.getElementById('apikey').value;
+      const resultDiv = document.getElementById('result');
+
+      if (!zip || !apiKey) {
+        resultDiv.innerText = "Please enter both a ZIP code and API key.";
+        return;
+      }
+
+      try {
+        const [weatherRes, astroRes] = await Promise.all([
+          fetch(`https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${zip}`),
+          fetch(`https://api.weatherapi.com/v1/astronomy.json?key=${apiKey}&q=${zip}&dt=${new Date().toISOString().split('T')[0]}`)
+        ]);
+
+        const weather = await weatherRes.json();
+        const astro = await astroRes.json();
+
+        const temp = weather.current.temp_f;
+        const pressure = weather.current.pressure_in;
+        const condition = weather.current.condition.text.toLowerCase();
+        const wind = weather.current.wind_mph;
+        const windDir = weather.current.wind_dir;
+        const hour = new Date().getHours();
+        const moonPhase = astro.astronomy.astro.moon_phase;
+
+        let score = 0;
+        let lure = "Soft plastic worms";
+
+        // Temperature
+        if (temp >= 60 && temp <= 80) score += 2;
+        else if ((temp >= 50 && temp < 60) || (temp > 80 && temp <= 85)) score += 1;
+
+        // Pressure
+        if (pressure >= 29.6 && pressure <= 30.2) score += 2;
+        else if (pressure > 30.2 || pressure < 29.6) score += 1;
+
+        // Clouds/Sun
+        if (condition.includes("cloudy") || condition.includes("overcast")) score += 2;
+        else if (condition.includes("clear") || condition.includes("sunny")) score += 1;
+        else if (condition.includes("rain")) score -= 1;
+
+        // Wind
+        if (wind > 5 && wind <= 12) score += 1;
+
+        // Time of Day
+        if (hour >= 5 && hour <= 9 || hour >= 17 && hour <= 20) score += 2;
+        else if (hour >= 10 && hour <= 16) score += 1;
+
+        // Moon Phase
+        if (moonPhase.includes("Full") || moonPhase.includes("New")) score += 1;
+
+        // Seasonal logic
+        const month = new Date().getMonth() + 1;
+        if (month >= 4 && month <= 5) score += 1; // prespawn/spawn in NE
+
+        // Lure suggestion logic
+        if (temp >= 68 && condition.includes("clear")) lure = "Topwater frog or popper";
+        else if (wind > 10) lure = "Spinnerbait or chatterbait";
+        else if (condition.includes("cloudy")) lure = "Crankbait or swimbait";
+        else if (pressure < 29.6) lure = "Finesse worm or ned rig";
+
+        // Final prediction
+        let prediction;
+        if (score >= 8) prediction = "Excellent! Bass are likely to be highly active.";
+        else if (score >= 5) prediction = "Good conditions. Expect some solid bites.";
+        else if (score >= 3) prediction = "Fair. Try deeper water or cover.";
+        else prediction = "Tough bite expected. Use finesse and fish slow.";
+
+        resultDiv.innerHTML = `
+          <p><strong>Conditions:</strong> ${condition}, ${temp}°F, ${pressure} inHg</p>
+          <p><strong>Wind:</strong> ${wind} mph from ${windDir}</p>
+          <p><strong>Moon Phase:</strong> ${moonPhase}</p>
+          <p><strong>Time:</strong> ${hour}:00</p>
+          <p><strong>Prediction:</strong> ${prediction}</p>
+          <p><strong>Lure Suggestion:</strong> ${lure}</p>
+        `;
+      } catch (error) {
+        resultDiv.innerText = "Error fetching data. Check your API key or ZIP code.";
+      }
+    }
+  </script>
+</body>
+</html>
