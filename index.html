@@ -90,32 +90,6 @@
         const month = today.getMonth() + 1;
         if (month >= 4 && month <= 5) score += 1;
 
-        
-         
-
-// where isSpawn should also use estimatedWaterTemp:
-  const isSpawn = (month >= 4 && month <= 6) && (estimatedWaterTemp >= 60 && estimatedWaterTemp <= 75);
-  const isSummer = (month >= 6 && month <= 8 && estimatedWaterTemp >= 75);
-  const isFall = (month >= 9 && month <= 11);
-
-// Lure suggestion logic
-if (isSpawn && condition.includes("clear") && hour >= 6 && hour <= 10) {
-  lure = "Texas-rigged soft plastic or wacky rig near beds";
-} else if (isSummer && estimatedWaterTemp > 78 && wind < 5 && hour >= 12) {
-  lure = "Deep diving crankbait or drop shot";
-} else if (isFall && wind >= 8 && condition.includes("cloudy")) {
-  lure = "Spinnerbait or lipless crankbait";
-} else if (wind >= 10) {
-  lure = "Chatterbait or spinnerbai";
-} else if (pressure < 29.6 || condition.includes("rain")) {
-  lure = "Finesse worm or ned rig tight to cover";
-} else if (hour >= 5 && hour <= 8 && temp >= 68 && condition.includes("clear")) {
-  lure = "Topwater walking bait or buzzbait";
-} else if (moonPhase.includes("Full") || moonPhase.includes("New")) {
-  lure = "Jig or swimbait during early and late hours";
-} else {
-  lure = "Senko-style worm or fluke around structure";
-}
 
 
         // Estimate water temperature
@@ -136,6 +110,30 @@ if (isSpawn && condition.includes("clear") && hour >= 6 && hour <= 10) {
         else if (score >= 3) prediction = "Fair. Try deeper water or cover.";
         else prediction = "Tough bite expected. Use finesse and fish slow.";
 
+        // Lure suggestion logic
+if (isSpawn && condition.includes("clear") && hour >= 6 && hour <= 10) {
+  // where isSpawn should also use estimatedWaterTemp:
+  const isSpawn = (month >= 4 && month <= 6) && (estWaterTemp >= 60 && estWaterTemp <= 75);
+  const isSummer = (month >= 6 && month <= 8 && estWaterTemp >= 75);
+  const isFall = (month >= 9 && month <= 11);
+  lure = "Texas-rigged soft plastic or wacky rig near beds";
+} else if (isSummer && estWaterTemp > 78 && wind < 5 && hour >= 12) {
+  lure = "Deep diving crankbait or drop shot";
+} else if (isFall && wind >= 8 && condition.includes("cloudy")) {
+  lure = "Spinnerbait or lipless crankbait";
+} else if (wind >= 10) {
+  lure = "Chatterbait or spinnerbai";
+} else if (pressure < 29.6 || condition.includes("rain")) {
+  lure = "Finesse worm or ned rig tight to cover";
+} else if (hour >= 5 && hour <= 8 && temp >= 68 && condition.includes("clear")) {
+  lure = "Topwater walking bait or buzzbait";
+} else if (moonPhase.includes("Full") || moonPhase.includes("New")) {
+  lure = "Jig or swimbait during early and late hours";
+} else {
+  lure = "Senko-style worm or fluke around structure";
+}
+
+        
         resultDiv.innerHTML = `
           <p><strong>Date & Time:</strong> ${today.toDateString()}, ${today.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</p>
           <p><strong>Conditions:</strong> ${condition}, ${temp}°F, ${pressure} inHg</p>
