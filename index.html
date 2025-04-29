@@ -31,6 +31,14 @@
 
   <input type="text" id="zip" placeholder="Enter ZIP Code">
   <input type="text" id="apikey" placeholder="Enter your WeatherAPI Key">
+  <select id="state">
+  <option value="">Select State</option>
+  <option value="MA">Massachusetts</option>
+  <option value="FL">Florida</option>
+  <option value="TX">Texas</option>
+  <!-- Add more states as needed -->
+</select>
+
   <button onclick="predictActivity()">Predict Bass Activity</button>
 
   <div id="result"></div>
@@ -109,7 +117,12 @@ function estimateWaterTempWithLocation(temp, condition, wind, month, stateAbbr) 
 }
 
 
-       const stateAbbr = weather.location.region;
+       const stateAbbr = document.getElementById('state').value;
+if (!stateAbbr) {
+  resultDiv.innerText = "Please select your state.";
+  return;
+}
+
 let estWaterTemp = estimateWaterTempWithLocation(temp, condition, wind, month, stateAbbr);
 
 
