@@ -185,10 +185,21 @@ const lureList = getLureSuggestions(clarity, estWaterTemp, activityLevel);
 const lure = lureList.join(', ');
 
 
-        // Best fishing time
-        let bestTime = "6–9 AM or 5–8 PM";
-        if (moonPhase.includes("Full")) bestTime = "Early morning & late evening";
-        else if (condition.includes("cloudy")) bestTime = "Extended: 6 AM–10 AM, 4 PM–8 PM";
+      // Get best time to fish
+  function getBestTimeToFish(moonPhase, temp, condition, baroTrend, waterBody) {
+    let bestTimes = [];
+    if (moonPhase.includes('Full') || moonPhase.includes('New')) bestTimes.push('Midday 11 AM–2 PM');
+    if (temp >= 65 && temp <= 75) bestTimes.push('Morning 6–9 AM');
+    if (temp > 75) bestTimes.push('Evening 5–8 PM');
+    if (condition.includes('cloudy') || condition.includes('overcast')) bestTimes.push('Extended bite all day');
+    if (baroTrend === 'falling') bestTimes.push('Before storm');
+    if (baroTrend === 'rising') bestTimes.push('Post-front midday');
+    if (waterBody === 'Pond' || waterBody === 'Shallow Lake') bestTimes.push('Mid-morning as water warms');
+    if (waterBody === 'River') bestTimes.push('Near current breaks anytime');
+    return [...new Set(bestTimes)].join(', ');
+  }
+
+  const bestTime = getBestTimeToFish(moonPhase, estimatedWaterTemp, condition, baroTrend, waterBody);
 
         // Prediction
         let prediction = "Tough bite expected. Use finesse and fish slow.";
