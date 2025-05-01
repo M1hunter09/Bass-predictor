@@ -159,9 +159,94 @@
 
         const activityLevel = score >= 8 ? 'High' : score >= 5 ? 'Medium' : 'Low';
         
-        // Lure suggestions
-        const lureList = getLureSuggestions(clarity, estWaterTemp, activityLevel);
-        const lure = lureList.join(', ');
+      function getLureSuggestions(clarity, temp, activity, timeOfDay = null, weather = null) {
+  let lures = [];
+
+  // Ensure clarity and activity inputs are valid and normalized
+  clarity = clarity.charAt(0).toUpperCase() + clarity.slice(1).toLowerCase();
+  activity = activity.charAt(0).toUpperCase() + activity.slice(1).toLowerCase();
+
+  // Handle invalid inputs
+  const validClarity = ['Clear', 'Slightly murky', 'Murky'];
+  const validActivity = ['Low', 'High'];
+
+  if (!validClarity.includes(clarity)) {
+    throw new Error('Invalid clarity input. Choose from: Clear, Slightly murky, Murky.');
+  }
+  if (!validActivity.includes(activity)) {
+    throw new Error('Invalid activity input. Choose from: Low, High.');
+  }
+
+  // Lure suggestions based on clarity
+  if (clarity === 'Clear') {
+    lures.push(
+      'Natural-color soft plastics (green pumpkin, watermelon)',
+      'Finesse jigs (brown, green pumpkin)',
+      'Swimbaits (shad or bluegill pattern)',
+      'Jerkbaits (silver, gold)'
+    );
+    if (temp >= 70) lures.push('Topwater walking baits (bone, chrome)');
+  }
+
+  if (clarity === 'Slightly murky') {
+    lures.push(
+      'Spinnerbaits (chartreuse/white)',
+      'Chatterbaits (green pumpkin, white)',
+      'Texas-rigged creature baits (black/blue, junebug)',
+      'Squarebill crankbaits (sexy shad, craw patterns)'
+    );
+    if (activity === 'High') lures.push('Frogs over grass or pads');
+  }
+
+  if (clarity === 'Murky') {
+    lures.push(
+      'Black/blue jigs',
+      'Bright or chartreuse spinnerbaits',
+      'Loud rattling crankbaits (red, chartreuse)',
+      'Chatterbaits with trailers (black/blue, white)'
+    );
+    if (temp >= 65) lures.push('Buzzbaits (black, white) for shallow reaction strikes');
+  }
+
+  // Add suggestions based on activity level
+  if (activity === 'Low') {
+    lures.push(
+      'Slow-dragged jig or worm presentations',
+      'Suspending jerkbaits',
+      'Deadsticked soft plastics'
+    );
+  } else if (activity === 'High') {
+    lures.push(
+      'Burning spinnerbaits',
+      'Fast-moving crankbaits',
+      'Aggressive topwater baits'
+    );
+  }
+
+  // Optional: Add additional lures based on time of day
+  if (timeOfDay) {
+    timeOfDay = timeOfDay.toLowerCase();
+    if (timeOfDay === 'morning') {
+      lures.push('Early morning topwater baits (buzzbaits, spooks)');
+    } else if (timeOfDay === 'evening') {
+      lures.push('Shallow-running crankbaits and spinnerbaits for low-light conditions');
+    }
+  }
+
+  // Optional: Add additional lures based on weather conditions
+  if (weather) {
+    weather = weather.toLowerCase();
+    if (weather === 'windy') {
+      lures.push('Wind-resistant lures (spinnerbaits, lipless crankbaits)');
+    } else if (weather === 'calm') {
+      lures.push('Finely tuned finesse lures (wacky rigs, drop shot)');
+    }
+  }
+
+  // Remove duplicates and return the final list
+  return [...new Set(lures)];
+}
+
 
         // Best time to fish
         const bestTime = getBestTimeToFish(moonPhase, estWaterTemp, condition, baroTrend, waterbody);
