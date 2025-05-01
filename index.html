@@ -289,13 +289,6 @@ console.log("Estimated Water Temp:", estWaterTemp);
         ];
         const fact = facts[Math.floor(Math.random() * facts.length)];
 
-      } catch (e) {
-        resultDiv.innerText = "Error retrieving data. Check your ZIP/API key.";
-      } catch (error) {
-        errorMessageDiv.innerText = "Error fetching data. Please check your inputs and try again.";
-      }
-    }
-
     function getLureSuggestions(clarity, temp, activityLevel) {
       const lureList = [];
       if (clarity === "Clear") {
@@ -332,7 +325,16 @@ console.log("Estimated Water Temp:", estWaterTemp);
   <p><strong>Best Time to Fish:</strong> ${bestTime}</p>
   <p><strong>Recommended Lures:</strong> ${getLureSuggestions(clarity, estWaterTemp, activityLevel).join(', ')}</p>
 `;
-    
+
+    funFactDiv.innerText = fact;
+   } catch (e) {
+        resultDiv.innerText = "Error retrieving data. Check your ZIP/API key.";
+      } catch (error) {
+        errorMessageDiv.innerText = "Error fetching data. Please check your inputs and try again.";
+      }
+    }
+
+        
 </script>
 </body>
 </html>
