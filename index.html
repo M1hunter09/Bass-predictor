@@ -135,22 +135,50 @@
         const isSummer = (month >= 6 && month <= 8 && estWaterTemp >= 75);
         const isFall = (month >= 9 && month <= 11);
 
-        // Lure suggestions
-        let lure = "Senko (Green Pumpkin)";
-        if (clarity === "Murky") {
-          if (wind >= 10) lure = "Chatterbait (Black/Blue)";
-          else lure = "Creature Bait (Black Neon)";
-        } else if (isSpawn && clarity === "Clear") {
-          lure = "Wacky Rig (Watermelon Red)";
-        } else if (isSummer && estWaterTemp > 80 && hour >= 12) {
-          lure = "Drop Shot (Morning Dawn)";
-        } else if (isFall && condition.includes("cloudy")) {
-          lure = "Spinnerbait (White/Chartreuse)";
-        } else if (hour >= 5 && hour <= 8 && condition.includes("clear")) {
-          lure = "Topwater Walking Bait (Bone)";
-        } else if (moonPhase.includes("New") && hour >= 18) {
-          lure = "Jig (Black/Blue) near cover";
-        }
+        function getLureSuggestions(clarity, temp, activity) {
+  let lures = [];
+
+  if (clarity === 'Clear') {
+    lures.push(
+      'Natural-color soft plastics (green pumpkin, watermelon)',
+      'Finesse jigs (brown, green pumpkin)',
+      'Swimbaits (shad or bluegill pattern)',
+      'Jerkbaits (silver, gold)'
+    );
+    if (temp >= 70) lures.push('Topwater walking baits (bone, chrome)');
+  }
+  
+  if (clarity === 'Slightly Murky') {
+    lures.push(
+      'Spinnerbaits (chartreuse/white)',
+      'Chatterbaits (green pumpkin, white)',
+      'Texas-rigged creature baits (black/blue, junebug)',
+      'Squarebill crankbaits (sexy shad, craw patterns)'
+    );
+    if (activity === 'High') lures.push('Frogs over grass or pads');
+  }
+  
+  if (clarity === 'Murky') {
+    lures.push(
+      'Black/blue jigs',
+      'Bright or chartreuse spinnerbaits',
+      'Loud rattling crankbaits (red, chartreuse)',
+      'Chatterbaits with trailers (black/blue, white)'
+    );
+    if (temp >= 65) lures.push('Buzzbaits (black, white) for shallow reaction strikes');
+  }
+
+  // Add by activity level
+  if (activity === 'Low') {
+    lures.push('Slow-dragged jig or worm presentations', 'Suspending jerkbaits', 'Deadsticked soft plastics');
+  } else if (activity === 'High') {
+    lures.push('Burning spinnerbaits', 'Fast-moving crankbaits', 'Aggressive topwater baits');
+  }
+
+  // Remove duplicates and return
+  return [...new Set(lures)];
+}
+
 
         // Best fishing time
         let bestTime = "6–9 AM or 5–8 PM";
