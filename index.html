@@ -105,38 +105,53 @@ else if (pressure < pastPressure - 0.2) baroTrend = "Falling";
         if (wind > 10 || condition.includes("rain")) clarity = "Murky";
         else if (wind > 6 || condition.includes("cloudy")) clarity = "Slightly Murky";
 
-        // Water temperature estimation
-        const stateTemps = {
-          "FL": [62, 65, 70, 75, 80, 85, 87, 87, 85, 80, 72, 66],
-          "MA": [37, 40, 45, 53, 63, 70, 75, 74, 68, 60, 50, 41],
-          "TX": [50, 55, 62, 68, 75, 80, 85, 84, 78, 70, 60, 52]
-        };
-        const base = stateTemps[stateAbbr] ? stateTemps[stateAbbr][month - 1] : temp;
-        const sunBonus = condition.includes("sunny") ? 2 : (condition.includes("cloudy") ? -1 : 0);
-        const windPenalty = wind > 10 ? -1 : 0;
-        let estWaterTemp = Math.round((base + sunBonus + windPenalty) * 10) / 10;
+     const stateTemps = {
+  "FL": [62, 65, 70, 75, 80, 85, 87, 87, 85, 80, 72, 66],
+  "MA": [37, 40, 45, 53, 63, 70, 75, 74, 68, 60, 50, 41],
+  "TX": [50, 55, 62, 68, 75, 80, 85, 84, 78, 70, 60, 52]
+};
 
-         // Calculate the difference between air and water temperatures
-let tempDifference = temp - estWaterTemp;
+function estimateWaterTempWithLocation(temp, condition, wind, month, stateAbbr) {
+  // Ensure fallback is defined (for an invalid stateAbbr)
+  const fallback = 60;  // Default fallback temperature if the state is invalid
+  
+  if (!stateTemps[stateAbbr]) return fallback;
 
-// Adjust water temperature based on air temperature vs. water temperature
-if (tempDifference > 5) {
-    // Air temp is significantly higher than water temp
+  const base = stateTemps[stateAbbr][month - 1];
+
+  let sunBonus = condition.includes("sunny") ? 2 : (condition.includes("cloudy") ? -1 : 0);
+  let windPenalty = wind > 10 ? -1 : 0;
+
+  let estWaterTemp = Math.round((base + sunBonus + windPenalty) * 10) / 10;
+
+  // Adjust water temperature based on air temperature vs. water temperature
+  let tempDifference = temp - estWaterTemp;
+
+  if (tempDifference > 5) {
     estWaterTemp += (tempDifference * 0.1); // Small positive shift
-} else if (tempDifference < -25) {
-    // Air temp is significantly lower than water temp (more than 25 degrees)
-    estWaterTemp -= Math.abs(tempDifference * 0.5); // Larger negative shift for bigger temp difference
-} else if (tempDifference < -10) {
-    // Air temp is lower than water temp (between 10 and 25 degrees)
+  } else if (tempDifference < -25) {
+    estWaterTemp -= Math.abs(tempDifference * 0.5); // Larger negative shift
+  } else if (tempDifference < -10) {
     estWaterTemp -= Math.abs(tempDifference * 0.25); // Moderate negative shift
-} else if (tempDifference < -5) {
-    // Air temp is a bit lower than water temp (between 5 and 10 degrees)
+  } else if (tempDifference < -5) {
     estWaterTemp -= Math.abs(tempDifference * 0.1); // Smaller negative shift
+  }
+
+  // Round the final estimated water temperature
+  return Math.round(estWaterTemp * 10) / 10;
 }
 
-// Ensure that the temperature is rounded
-estWaterTemp = Math.round(estWaterTemp * 10) / 10;
-        
+const stateAbbr = document.getElementById('state').value || weather.location.region;
+if (!stateAbbr) {
+  resultDiv.innerText = "Please select your state.";
+  return;
+}
+
+let estWaterTemp = estimateWaterTempWithLocation(temp, condition, wind, month, stateAbbr);
+
+// Output the estimated water temperature (or handle the result as needed)
+console.log('Estimated Water Temperature:', estWaterTemp);
+       
         // Score logic
         if (temp >= 60 && temp <= 75) score += 2;
         else if ((temp > 75 && temp <= 80) && (hour <= 9 || hour >= 17)) score += 1;
