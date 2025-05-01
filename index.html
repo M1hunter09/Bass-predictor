@@ -89,14 +89,15 @@
         const windDir = weather.current.wind_dir;
         const condition = weather.current.condition.text.toLowerCase();
         const moonPhase = astro.astronomy.astro.moon_phase;
-        const pastPressure = history.forecast.forecastday[0].day.avgtemp_f;
+        const pastPressure = history.forecast.forecastday[0].day.avgpressure_in;
 
-        let score = 0;
+let score = 0;
 
-        // Barometric trend
-        let baroTrend = "Stable";
-        if (pressure > pastPressure + 0.2) baroTrend = "Rising";
-        else if (pressure < pastPressure - 0.2) baroTrend = "Falling";
+// Barometric trend
+let baroTrend = "Stable";
+if (pressure > pastPressure + 0.2) baroTrend = "Rising";
+else if (pressure < pastPressure - 0.2) baroTrend = "Falling";
+
 
         // Water clarity
         let clarity = "Clear";
