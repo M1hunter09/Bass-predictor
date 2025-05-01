@@ -74,11 +74,10 @@
         const month = today.getMonth() + 1;
 
         const [weatherRes, astroRes, historyRes] = await Promise.all([
-  fetch(`https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${zip}`),
-  fetch(`https://api.weatherapi.com/v1/astronomy.json?key=${apiKey}&q=${zip}&dt=${isoDate}`),
-  fetch(`https://api.weatherapi.com/v1/history.json?key=${apiKey}&q=${zip}&dt=${new Date(Date.now() - 86400000).toISOString().split('T')[0]}`)
-]);
-
+          fetch(`https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${zip}`),
+          fetch(`https://api.weatherapi.com/v1/astronomy.json?key=${apiKey}&q=${zip}&dt=${isoDate}`),
+          fetch(`https://api.weatherapi.com/v1/history.json?key=${apiKey}&q=${zip}&dt=${new Date(Date.now() - 86400000).toISOString().split('T')[0]}`)
+        ]);
 
         const weather = await weatherRes.json();
         const astro = await astroRes.json();
@@ -115,27 +114,15 @@
         const windPenalty = wind > 10 ? -1 : 0;
         let estWaterTemp = Math.round((base + sunBonus + windPenalty) * 10) / 10;
 
-         // Calculate the difference between air and water temperatures
-let tempDifference = temp - estWaterTemp;
-
-// Adjust water temperature based on air temperature vs. water temperature
-if (tempDifference > 5) {
-    // Air temp is significantly higher than water temp
-    estWaterTemp += (tempDifference * 0.1); // Small positive shift
-} else if (tempDifference < -25) {
-    // Air temp is significantly lower than water temp (more than 25 degrees)
-    estWaterTemp -= Math.abs(tempDifference * 0.5); // Larger negative shift for bigger temp difference
-} else if (tempDifference < -10) {
-    // Air temp is lower than water temp (between 10 and 25 degrees)
-    estWaterTemp -= Math.abs(tempDifference * 0.25); // Moderate negative shift
-} else if (tempDifference < -5) {
-    // Air temp is a bit lower than water temp (between 5 and 10 degrees)
-    estWaterTemp -= Math.abs(tempDifference * 0.1); // Smaller negative shift
-}
-
-// Ensure that the temperature is rounded
-estWaterTemp = Math.round(estWaterTemp * 10) / 10;
+        // Adjust water temperature
+        let tempDifference = temp - estWaterTemp;
+        if (tempDifference > 5) estWaterTemp += (tempDifference * 0.1);
+        else if (tempDifference < -25) estWaterTemp -= Math.abs(tempDifference * 0.5);
+        else if (tempDifference < -10) estWaterTemp -= Math.abs(tempDifference * 0.25);
+        else if (tempDifference < -5) estWaterTemp -= Math.abs(tempDifference * 0.1);
         
+        estWaterTemp = Math.round(estWaterTemp * 10) / 10;
+
         // Score logic
         if (temp >= 60 && temp <= 75) score += 2;
         else if ((temp > 75 && temp <= 80) && (hour <= 9 || hour >= 17)) score += 1;
@@ -153,75 +140,14 @@ estWaterTemp = Math.round(estWaterTemp * 10) / 10;
 
         if (moonPhase.includes("Full") || moonPhase.includes("New")) score += 1;
 
-        const isSpawn = (month >= 4 && month <= 6) && (estWaterTemp >= 60 && estWaterTemp <= 75);
-        const isSummer = (month >= 6 && month <= 8 && estWaterTemp >= 75);
-        const isFall = (month >= 9 && month <= 11);
-
-        //lure suggestion
-        function getLureSuggestions(clarity, temp, activity) {
-  let lures = [];
-
-  if (clarity === 'Clear') {
-    lures.push(
-      'Natural-color soft plastics (green pumpkin, watermelon)',
-      'Finesse jigs (brown, green pumpkin)',
-      'Swimbaits (shad or bluegill pattern)',
-      'Jerkbaits (silver, gold)'
-    );
-    if (temp >= 70) lures.push('Topwater walking baits (bone, chrome)');
-  }
-  
-  if (clarity === 'Slightly Murky') {
-    lures.push(
-      'Spinnerbaits (chartreuse/white)',
-      'Chatterbaits (green pumpkin, white)',
-      'Texas-rigged creature baits (black/blue, junebug)',
-      'Squarebill crankbaits (sexy shad, craw patterns)'
-    );
-    if (activity === 'High') lures.push('Frogs over grass or pads');
-  }
-  
-  if (clarity === 'Murky') {
-    lures.push(
-      'Black/blue jigs',
-      'Bright or chartreuse spinnerbaits',
-      'Loud rattling crankbaits (red, chartreuse)',
-      'Chatterbaits with trailers (black/blue, white)'
-    );
-    if (temp >= 65) lures.push('Buzzbaits (black, white) for shallow reaction strikes');
-  }
-
-  // Add by activity level
-  if (activity === 'Low') {
-    lures.push('Slow-dragged jig or worm presentations', 'Suspending jerkbaits', 'Deadsticked soft plastics');
-  } else if (activity === 'High') {
-    lures.push('Burning spinnerbaits', 'Fast-moving crankbaits', 'Aggressive topwater baits');
-  }
-
-  // Remove duplicates and return
-  return [...new Set(lures)];
-}
+        const activityLevel = score >= 8 ? 'High' : score >= 5 ? 'Medium' : 'Low';
         
-const activityLevel = score >= 8 ? 'High' : score >= 5 ? 'Medium' : 'Low';
-const lureList = getLureSuggestions(clarity, estWaterTemp, activityLevel);
-const lure = lureList.join(', ');
+        // Lure suggestions
+        const lureList = getLureSuggestions(clarity, estWaterTemp, activityLevel);
+        const lure = lureList.join(', ');
 
-
-      // Get best time to fish
-  function getBestTimeToFish(moonPhase, temp, condition, baroTrend, waterBody) {
-    let bestTimes = [];
-    if (moonPhase.includes('Full') || moonPhase.includes('New')) bestTimes.push('Midday 11 AM–2 PM');
-    if (temp >= 65 && temp <= 75) bestTimes.push('Morning 6–9 AM');
-    if (temp > 75) bestTimes.push('Evening 5–8 PM');
-    if (condition.includes('cloudy') || condition.includes('overcast')) bestTimes.push('Extended bite all day');
-    if (baroTrend === 'falling') bestTimes.push('Before storm');
-    if (baroTrend === 'rising') bestTimes.push('Post-front midday');
-    if (waterBody === 'Pond' || waterBody === 'Shallow Lake') bestTimes.push('Mid-morning as water warms');
-    if (waterBody === 'River') bestTimes.push('Near current breaks anytime');
-    return [...new Set(bestTimes)].join(', ');
-  }
-
-  const bestTime = getBestTimeToFish(moonPhase, estWaterTemp, condition, baroTrend, waterBody);
+        // Get best time to fish
+        const bestTime = getBestTimeToFish(moonPhase, estWaterTemp, condition, baroTrend, waterbody);
 
         // Prediction
         let prediction = "Tough bite expected. Use finesse and fish slow.";
@@ -240,23 +166,48 @@ const lure = lureList.join(', ');
         const fact = facts[Math.floor(Math.random() * facts.length)];
 
         resultDiv.innerHTML = `
-  <p><strong>Date & Time:</strong> ${today.toDateString()}, ${today.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</p>
-  <p><strong>Conditions:</strong> ${condition}, ${temp}°F, ${pressure} inHg (${baroTrend})</p>
-  <p><strong>Wind:</strong> ${wind} mph from ${windDir}</p>
-  <p><strong>Moon Phase:</strong> ${moonPhase}</p>
-  <p><strong>Water Body:</strong> ${waterbody.charAt(0).toUpperCase() + waterbody.slice(1)}</p>
-  <p><strong>Water Clarity:</strong> ${clarity}</p>
-  <p><strong>Estimated Water Temp:</strong> ${estWaterTemp}°F</p>
-  <p><strong>Prediction:</strong> ${prediction}</p>
-  <p><strong>Lure Suggestion:</strong> ${lure}</p>
-  <p><strong>Best Time to Fish:</strong> ${bestTime}</p>
-`;
+          <p><strong>Date & Time:</strong> ${today.toDateString()}, ${today.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</p>
+          <p><strong>Conditions:</strong> ${condition}, ${temp}°F, ${pressure} inHg (${baroTrend})</p>
+          <p><strong>Wind:</strong> ${wind} mph from ${windDir}</p>
+          <p><strong>Moon Phase:</strong> ${moonPhase}</p>
+          <p><strong>Water Body:</strong> ${waterbody.charAt(0).toUpperCase() + waterbody.slice(1)}</p>
+          <p><strong>Water Clarity:</strong> ${clarity}</p>
+          <p><strong>Estimated Water Temp:</strong> ${estWaterTemp}°F</p>
+          <p><strong>Prediction:</strong> ${prediction}</p>
+          <p><strong>Lure Suggestion:</strong> ${lure}</p>
+          <p><strong>Best Time:</strong> ${bestTime}</p>
+        `;
 
-        funFactDiv.innerText = "Fun Fact: " + fact;
-      } catch (e) {
-        resultDiv.innerText = "Error retrieving data. Check your ZIP/API key.";
+        funFactDiv.innerText = fact;
+      } catch (error) {
+        resultDiv.innerText = "Error fetching data. Please check your inputs and try again.";
       }
+    }
+
+    function getLureSuggestions(clarity, temp, activityLevel) {
+      const lureList = [];
+      if (clarity === "Clear") {
+        lureList.push("Spinnerbaits", "Crankbaits", "Jerkbaits");
+      } else if (clarity === "Murky") {
+        lureList.push("Chatterbaits", "Jigs", "Swimbaits");
+      } else {
+        lureList.push("Worms", "Crankbaits", "Topwater");
+      }
+
+      if (activityLevel === 'High') lureList.push("Topwater");
+      if (activityLevel === 'Low') lureList.push("Drop Shot");
+
+      if (temp < 55) lureList.push("Jigs");
+      return lureList;
+    }
+
+    function getBestTimeToFish(moonPhase, temp, condition, baroTrend, waterbody) {
+      if (moonPhase.includes("Full") || moonPhase.includes("New")) return "Best during dawn and dusk.";
+      if (condition.includes("cloudy") || condition.includes("overcast")) return "Midday is great.";
+      if (baroTrend === "Falling") return "Best to wait until the pressure stabilizes.";
+      return "Morning and evening are ideal.";
     }
   </script>
 </body>
 </html>
+
