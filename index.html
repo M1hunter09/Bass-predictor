@@ -107,7 +107,9 @@
         const condition = weather.current.condition.text.toLowerCase();
         const moonPhase = astro.astronomy.astro.moon_phase;
         const pastPressure = history.forecast.forecastday[0].day.avgtemp_f;
+        const bestTime = getBestTimeToFish(moonPhase, estWaterTemp, condition, baroTrend, waterbody);
 
+        
         let score = 0;
 
         // Barometric trend
@@ -285,20 +287,6 @@ console.log("Estimated Water Temp:", estWaterTemp);
         ];
         const fact = facts[Math.floor(Math.random() * facts.length)];
 
-        resultDiv.innerHTML = `
-          <p><strong>Date & Time:</strong> ${today.toDateString()}, ${today.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</p>
-          <p><strong>Conditions:</strong> ${condition}, ${temp}°F, ${pressure} inHg (${baroTrend})</p>
-          <p><strong>Wind:</strong> ${wind} mph from ${windDir}</p>
-          <p><strong>Moon Phase:</strong> ${moonPhase}</p>
-          <p><strong>Water Body:</strong> ${waterbody.charAt(0).toUpperCase() + waterbody.slice(1)}</p>
-          <p><strong>Water Clarity:</strong> ${clarity}</p>
-          <p><strong>Estimated Water Temp:</strong> ${estWaterTemp}°F</p>
-          <p><strong>Prediction:</strong> ${prediction}</p>
-          <p><strong>Lure Suggestion:</strong> ${lure}</p>
-          <p><strong>Best Time:</strong> ${bestTime}</p>
-        `;
-
-        
       } catch (e) {
         resultDiv.innerText = "Error retrieving data. Check your ZIP/API key.";
       } catch (error) {
@@ -322,13 +310,27 @@ console.log("Estimated Water Temp:", estWaterTemp);
       if (temp < 55) lureList.push("Jigs");
       return lureList;
     }
-
+    
     function getBestTimeToFish(moonPhase, temp, condition, baroTrend, waterbody) {
       if (moonPhase.includes("Full") || moonPhase.includes("New")) return "Best during dawn and dusk.";
       if (condition.includes("cloudy") || condition.includes("overcast")) return "Midday is great.";
       if (baroTrend === "Falling") return "Best to wait until the pressure stabilizes.";
       return "Morning and evening are ideal.";
     }
-  </script>
+
+     
+        resultDiv.innerHTML = `
+  <p><strong>Date & Time:</strong> ${today.toDateString()}, ${today.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</p>
+  <p><strong>Conditions:</strong> ${condition}, ${temp}°F, ${pressure} inHg (${baroTrend})</p>
+  <p><strong>Wind:</strong> ${wind} mph from ${windDir}</p>
+  <p><strong>Moon Phase:</strong> ${moonPhase}</p>
+  <p><strong>Estimated Water Temp:</strong> ${estWaterTemp}°F</p>
+  <p><strong>Activity Level:</strong> ${activityLevel}</p>
+  <p><strong>Prediction:</strong> ${prediction}</p>
+  <p><strong>Best Time to Fish:</strong> ${bestTime}</p>
+  <p><strong>Recommended Lures:</strong> ${getLureSuggestions(clarity, estWaterTemp, activityLevel).join(', ')}</p>
+`;
+    
+</script>
 </body>
 </html>
