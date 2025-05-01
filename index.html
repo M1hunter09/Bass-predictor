@@ -298,7 +298,9 @@ console.log("Estimated Water Temp:", estWaterTemp);
           <p><strong>Best Time:</strong> ${bestTime}</p>
         `;
 
-        funFactDiv.innerText = fact;
+        funFactDiv.innerText = "Fun Fact: " + fact;
+      } catch (e) {
+        resultDiv.innerText = "Error retrieving data. Check your ZIP/API key.";
       } catch (error) {
         errorMessageDiv.innerText = "Error fetching data. Please check your inputs and try again.";
       }
