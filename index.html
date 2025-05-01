@@ -116,7 +116,7 @@
         const estWaterTemp = Math.round((base + sunBonus + windPenalty) * 10) / 10;
 
          // Calculate the difference between air and water temperatures
-const tempDifference = temp - estWaterTemp;
+let tempDifference = temp - estWaterTemp;
 
 // Adjust water temperature based on air temperature vs. water temperature
 if (tempDifference > 5) {
@@ -221,7 +221,7 @@ const lure = lureList.join(', ');
     return [...new Set(bestTimes)].join(', ');
   }
 
-  const bestTime = getBestTimeToFish(moonPhase, estimatedWaterTemp, condition, baroTrend, waterBody);
+  const bestTime = getBestTimeToFish(moonPhase, estWaterTemp, condition, baroTrend, waterBody);
 
         // Prediction
         let prediction = "Tough bite expected. Use finesse and fish slow.";
