@@ -1,53 +1,66 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Advanced Bass Activity Predictor</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 700px;
-      margin: 40px auto;
-      background: #f4fafd;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #bbb;
-    }
-    input, button {
-      font-size: 1em;
-      padding: 10px;
-      margin-top: 10px;
-      width: 100%;
-    }
-    #result {
-      margin-top: 20px;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
-  <h2>Advanced Bass Activity Predictor</h2>
-  <p>Enter your ZIP code and API key to get detailed fishing predictions.</p>
-
-  <input type="text" id="zip" placeholder="Enter ZIP Code">
-  <input type="text" id="apikey" placeholder="Enter your WeatherAPI Key">
-  <select id="state" style="font-size: 1.5em; padding: 10px; margin-top: 10px; width: 100%;">
-  <option value="">Select State(optional)</option>
-  <option value="MA">Massachusetts</option>
-  <option value="FL">Florida</option>
-  <option value="TX">Texas</option>
-  <!-- Add more states as needed -->
-</select>
-
-  <button onclick="predictActivity()">Predict Bass Activity</button>
-
-  <div id="result"></div>
-
-  <script>
-    async function predictActivity() {
-      const zip = document.getElementById('zip').value;
-      const apiKey = document.getElementById('apikey').value;
-      const resultDiv = document.getElementById('result');
+ <html lang="en">
+ <head>
+   <meta charset="UTF-8">
+   <title>Advanced Bass Activity Predictor</title>
+   <style>
+     body {
+       font-family: Arial, sans-serif;
+       max-width: 700px;
+       margin: 40px auto;
+       background: #f4fafd;
+       padding: 20px;
+       border-radius: 10px;
+       box-shadow: 0 0 10px #bbb;
+     }
+     input, select, button {
+       font-size: 1em;
+       padding: 10px;
+       margin-top: 10px;
+       width: 100%;
+     }
+     #result {
+       margin-top: 20px;
+       font-weight: bold;
+     }
+     #fun-fact {
+       margin-top: 30px;
+       font-style: italic;
+       color: #555;
+     }
+   </style>
+ </head>
+ <body>
+   <h2>Advanced Bass Activity Predictor</h2>
+   <p>Enter your ZIP code and WeatherAPI key to get detailed fishing predictions.</p>
+ 
+   <input type="text" id="zip" placeholder="Enter ZIP Code">
+   <input type="text" id="apikey" placeholder="Enter your WeatherAPI Key">
+   <select id="state">
+     <option value="">Select State (optional)</option>
+     <option value="MA">Massachusetts</option>
+     <option value="FL">Florida</option>
+     <option value="TX">Texas</option>
+   </select>
+   <select id="waterbody">
+     <option value="lake">Lake</option>
+     <option value="pond">Pond</option>
+     <option value="river">River</option>
+     <option value="reservoir">Reservoir</option>
+   </select>
+   <button onclick="predictActivity()">Predict Bass Activity</button>
+ 
+   <div id="result"></div>
+   <div id="fun-fact"></div>
+ 
+   <script>
+     async function predictActivity() {
+       const zip = document.getElementById('zip').value;
+       const apiKey = document.getElementById('apikey').value;
+       const stateAbbr = document.getElementById('state').value;
+       const waterbody = document.getElementById('waterbody').value;
+       const resultDiv = document.getElementById('result');
+       const funFactDiv = document.getElementById('fun-fact');
 
       if (!zip || !apiKey) {
         resultDiv.innerText = "Please enter both a ZIP code and API key.";
