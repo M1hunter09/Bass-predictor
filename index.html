@@ -115,6 +115,27 @@
         const windPenalty = wind > 10 ? -1 : 0;
         const estWaterTemp = Math.round((base + sunBonus + windPenalty) * 10) / 10;
 
+         // Calculate the difference between air and water temperatures
+const tempDifference = temp - estWaterTemp;
+
+// Adjust water temperature based on air temperature vs. water temperature
+if (tempDifference > 5) {
+    // Air temp is significantly higher than water temp
+    estWaterTemp += (tempDifference * 0.1); // Small positive shift
+} else if (tempDifference < -25) {
+    // Air temp is significantly lower than water temp (more than 25 degrees)
+    estWaterTemp -= Math.abs(tempDifference * 0.5); // Larger negative shift for bigger temp difference
+} else if (tempDifference < -10) {
+    // Air temp is lower than water temp (between 10 and 25 degrees)
+    estWaterTemp -= Math.abs(tempDifference * 0.25); // Moderate negative shift
+} else if (tempDifference < -5) {
+    // Air temp is a bit lower than water temp (between 5 and 10 degrees)
+    estWaterTemp -= Math.abs(tempDifference * 0.1); // Smaller negative shift
+}
+
+// Ensure that the temperature is rounded
+estWaterTemp = Math.round(estWaterTemp * 10) / 10;
+        
         // Score logic
         if (temp >= 60 && temp <= 75) score += 2;
         else if ((temp > 75 && temp <= 80) && (hour <= 9 || hour >= 17)) score += 1;
