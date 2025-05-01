@@ -112,7 +112,7 @@
         const base = stateTemps[stateAbbr] ? stateTemps[stateAbbr][month - 1] : temp;
         const sunBonus = condition.includes("sunny") ? 2 : (condition.includes("cloudy") ? -1 : 0);
         const windPenalty = wind > 10 ? -1 : 0;
-        const estWaterTemp = Math.round((base + sunBonus + windPenalty) * 10) / 10;
+        let estWaterTemp = Math.round((base + sunBonus + windPenalty) * 10) / 10;
 
          // Calculate the difference between air and water temperatures
 let tempDifference = temp - estWaterTemp;
