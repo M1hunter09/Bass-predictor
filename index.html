@@ -74,10 +74,11 @@
         const month = today.getMonth() + 1;
 
         const [weatherRes, astroRes, historyRes] = await Promise.all([
-          fetch(`https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${zip}`),
-          fetch(`https://api.weatherapi.com/v1/astronomy.json?key=${apiKey}&q=${zip}&dt=${isoDate}`),
-          fetch(`https://api.weatherapi.com/v1/history.json?key=${apiKey}&q=${zip}&dt=${new Date(Date.now() - 86400000).toISOString().split('T')[0]}`)
-        ]);
+  fetch(`https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${zip}`),
+  fetch(`https://api.weatherapi.com/v1/astronomy.json?key=${apiKey}&q=${zip}&dt=${isoDate}`),
+  fetch(`https://api.weatherapi.com/v1/history.json?key=${apiKey}&q=${zip}&dt=${new Date(Date.now() - 86400000).toISOString().split('T')[0]}`)
+]);
+
 
         const weather = await weatherRes.json();
         const astro = await astroRes.json();
@@ -89,50 +90,52 @@
         const windDir = weather.current.wind_dir;
         const condition = weather.current.condition.text.toLowerCase();
         const moonPhase = astro.astronomy.astro.moon_phase;
-        const pastPressure = history.forecast.forecastday[0].day.avgpressure_in;
+        const pastPressure = history.forecast.forecastday[0].day.avgtemp_f;
 
-let score = 0;
+        let score = 0;
 
-// Barometric trend
-let baroTrend = "Stable";
-if (pressure > pastPressure + 0.2) baroTrend = "Rising";
-else if (pressure < pastPressure - 0.2) baroTrend = "Falling";
-
-
+        // Barometric trend
+        let baroTrend = "Stable";
+        if (pressure > pastPressure + 0.2) baroTrend = "Rising";
+        else if (pressure < pastPressure - 0.2) baroTrend = "Falling";
 
         // Water clarity
         let clarity = "Clear";
         if (wind > 10 || condition.includes("rain")) clarity = "Murky";
         else if (wind > 6 || condition.includes("cloudy")) clarity = "Slightly Murky";
 
-     const stateTemps = {
-  "FL": [62, 65, 70, 75, 80, 85, 87, 87, 85, 80, 72, 66],
-  "MA": [37, 40, 45, 53, 63, 70, 75, 74, 68, 60, 50, 41],
-  "TX": [50, 55, 62, 68, 75, 80, 85, 84, 78, 70, 60, 52]
-};
+        // Water temperature estimation
+        const stateTemps = {
+          "FL": [62, 65, 70, 75, 80, 85, 87, 87, 85, 80, 72, 66],
+          "MA": [37, 40, 45, 53, 63, 70, 75, 74, 68, 60, 50, 41],
+          "TX": [50, 55, 62, 68, 75, 80, 85, 84, 78, 70, 60, 52]
+        };
+        const base = stateTemps[stateAbbr] ? stateTemps[stateAbbr][month - 1] : temp;
+        const sunBonus = condition.includes("sunny") ? 2 : (condition.includes("cloudy") ? -1 : 0);
+        const windPenalty = wind > 10 ? -1 : 0;
+        let estWaterTemp = Math.round((base + sunBonus + windPenalty) * 10) / 10;
 
-function estimateWaterTempWithLocation(temp, condition, wind, month, stateAbbr) {
+         // Calculate the difference between air and water temperatures
+let tempDifference = temp - estWaterTemp;
 
-  if (!stateTemps[stateAbbr]) return fallback;
-
-  const base = stateTemps[stateAbbr][month - 1];
-
-  let sunBonus = condition.includes("sunny") ? 2 : (condition.includes("cloudy") ? -1 : 0);
-  let windPenalty = wind > 10 ? -1 : 0;
-
-  return Math.round((base + sunBonus + windPenalty) * 10) / 10;
+// Adjust water temperature based on air temperature vs. water temperature
+if (tempDifference > 5) {
+    // Air temp is significantly higher than water temp
+    estWaterTemp += (tempDifference * 0.1); // Small positive shift
+} else if (tempDifference < -25) {
+    // Air temp is significantly lower than water temp (more than 25 degrees)
+    estWaterTemp -= Math.abs(tempDifference * 0.5); // Larger negative shift for bigger temp difference
+} else if (tempDifference < -10) {
+    // Air temp is lower than water temp (between 10 and 25 degrees)
+    estWaterTemp -= Math.abs(tempDifference * 0.25); // Moderate negative shift
+} else if (tempDifference < -5) {
+    // Air temp is a bit lower than water temp (between 5 and 10 degrees)
+    estWaterTemp -= Math.abs(tempDifference * 0.1); // Smaller negative shift
 }
 
-
-       const stateAbbr = document.getElementById('state').value || weather.location.region;
-if (!stateAbbr) {
-  resultDiv.innerText = "Please select your state.";
-  return;
-}
-
-let estWaterTemp = estimateWaterTempWithLocation(temp, condition, wind, month, stateAbbr);
-
-
+// Ensure that the temperature is rounded
+estWaterTemp = Math.round(estWaterTemp * 10) / 10;
+        
         // Score logic
         if (temp >= 60 && temp <= 75) score += 2;
         else if ((temp > 75 && temp <= 80) && (hour <= 9 || hour >= 17)) score += 1;
@@ -237,17 +240,18 @@ const lure = lureList.join(', ');
         const fact = facts[Math.floor(Math.random() * facts.length)];
 
         resultDiv.innerHTML = `
-          <p><strong>Date & Time:</strong> ${today.toDateString()}, ${today.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</p>
-          <p><strong>Conditions:</strong> ${condition}, ${temp}°F, ${pressure} inHg (${baroTrend})</p>
-          <p><strong>Wind:</strong> ${wind} mph from ${windDir}</p>
-          <p><strong>Moon Phase:</strong> ${moonPhase}</p>
-          <p><strong>Water Body:</strong> ${waterbody.charAt(0).toUpperCase() + waterbody.slice(1)}</p>
-          <p><strong>Water Clarity:</strong> ${clarity}</p>
-          <p><strong>Estimated Water Temp:</strong> ${estWaterTemp}°F</p>
-          <p><strong>Prediction:</strong> ${prediction}</p>
-          <p><strong>Lure Suggestion:</strong> ${lure}</p>
-          <p><strong>Best Time to Fish:</strong> ${bestTime}</p>
-        `;
+  <p><strong>Date & Time:</strong> ${today.toDateString()}, ${today.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</p>
+  <p><strong>Conditions:</strong> ${condition}, ${temp}°F, ${pressure} inHg (${baroTrend})</p>
+  <p><strong>Wind:</strong> ${wind} mph from ${windDir}</p>
+  <p><strong>Moon Phase:</strong> ${moonPhase}</p>
+  <p><strong>Water Body:</strong> ${waterbody.charAt(0).toUpperCase() + waterbody.slice(1)}</p>
+  <p><strong>Water Clarity:</strong> ${clarity}</p>
+  <p><strong>Estimated Water Temp:</strong> ${estWaterTemp}°F</p>
+  <p><strong>Prediction:</strong> ${prediction}</p>
+  <p><strong>Lure Suggestion:</strong> ${lure}</p>
+  <p><strong>Best Time to Fish:</strong> ${bestTime}</p>
+`;
+
         funFactDiv.innerText = "Fun Fact: " + fact;
       } catch (e) {
         resultDiv.innerText = "Error retrieving data. Check your ZIP/API key.";
