@@ -179,6 +179,10 @@
   // Remove duplicates and return
   return [...new Set(lures)];
 }
+        
+const activityLevel = score >= 8 ? 'High' : score >= 5 ? 'Medium' : 'Low';
+const lureList = getLureSuggestions(clarity, estWaterTemp, activityLevel);
+const lure = lureList.join(', ');
 
 
         // Best fishing time
