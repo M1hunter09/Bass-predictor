@@ -149,9 +149,6 @@ if (!stateAbbr) {
 
 let estWaterTemp = estimateWaterTempWithLocation(temp, condition, wind, month, stateAbbr);
 
-// Output the estimated water temperature (or handle the result as needed)
-console.log('Estimated Water Temperature:', estWaterTemp);
-       
         // Score logic
         if (temp >= 60 && temp <= 75) score += 2;
         else if ((temp > 75 && temp <= 80) && (hour <= 9 || hour >= 17)) score += 1;
